@@ -51,6 +51,8 @@ public class HomeFragment extends Fragment {
     private Button viewAccountsBtn;
     private Button saveVersionListBtn;
     private Button skinChangeBtn;
+    private Button installQuestCraftBtn;
+    private Button diagnoseQuestCraftBtn;
     private Spinner themeStyleSpinner;
 
     @Nullable
@@ -88,6 +90,8 @@ public class HomeFragment extends Fragment {
         viewAccountsBtn = view.findViewById(R.id.viewAccountsBtn);
         saveVersionListBtn = view.findViewById(R.id.saveVersionListBtn);
         skinChangeBtn = view.findViewById(R.id.skinChangeBtn);
+        installQuestCraftBtn = view.findViewById(R.id.installQuestCraftBtn);
+        diagnoseQuestCraftBtn = view.findViewById(R.id.diagnoseQuestCraftBtn);
         themeStyleSpinner = view.findViewById(R.id.themeStyleSpinner);
 
         // 设置用户类型选择器
@@ -164,6 +168,9 @@ public class HomeFragment extends Fragment {
 
         skinChangeBtn.setOnClickListener(v -> showSkinChangeDialog());
 
+        installQuestCraftBtn.setOnClickListener(v -> installToQuestCraft());
+        diagnoseQuestCraftBtn.setOnClickListener(v -> showQuestCraftDiagnostics());
+
         // 设置折叠/展开功能的点击事件
         LinearLayout expandableSectionHeader = view.findViewById(R.id.expandableSectionHeader);
         TextView expandIndicator = view.findViewById(R.id.expandIndicator);
@@ -214,6 +221,60 @@ public class HomeFragment extends Fragment {
                 }
             }
         });
+    }
+
+    private void installToQuestCraft() {
+        String uuid = extractUUIDFromDisplay();
+        if (uuid == null || uuid.trim().isEmpty()) {
+            Toast.makeText(requireContext(), "请先创建或选择账号", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        File storageDir = getStorageDir();
+        File accountFile = new File(storageDir, uuid + ".json");
+        File launcherConf = new File(storageDir, "launcher.conf");
+
+        if (!accountFile.isFile() || !launcherConf.isFile()) {
+            Toast.makeText(requireContext(), "请先创建账号文件并保存配置", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        installQuestCraftBtn.setEnabled(false);
+        Toast.makeText(requireContext(), "正在准备 QuestCraft 安装文件...", Toast.LENGTH_SHORT).show();
+
+        Context appContext = requireContext().getApplicationContext();
+        new Thread(() -> {
+            QuestCraftInstaller.Result result =
+                    QuestCraftInstaller.install(appContext, accountFile, launcherConf);
+
+            if (!isAdded()) return;
+            requireActivity().runOnUiThread(() -> {
+                installQuestCraftBtn.setEnabled(true);
+                new MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(result.success ? "QuestCraft 安装完成" : "QuestCraft 安装未完成")
+                        .setMessage(result.message)
+                        .setPositiveButton("确定", null)
+                        .show();
+            });
+        }, "questcraft-installer").start();
+    }
+
+    private void showQuestCraftDiagnostics() {
+        diagnoseQuestCraftBtn.setEnabled(false);
+        Context appContext = requireContext().getApplicationContext();
+
+        new Thread(() -> {
+            String report = QuestCraftInstaller.diagnose(appContext);
+            if (!isAdded()) return;
+            requireActivity().runOnUiThread(() -> {
+                diagnoseQuestCraftBtn.setEnabled(true);
+                new MaterialAlertDialogBuilder(requireContext())
+                        .setTitle("QuestCraft 诊断")
+                        .setMessage(report)
+                        .setPositiveButton("确定", null)
+                        .show();
+            });
+        }, "questcraft-diagnostics").start();
     }
 
     private void generateUUID() {

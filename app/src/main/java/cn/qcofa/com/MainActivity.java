@@ -191,6 +191,48 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void requestRootAccess() {
+        requestRootBtn.setEnabled(false);
+        new Thread(() -> {
+            QuestCraftInstaller.Result result = QuestCraftInstaller.requestRoot();
+            runOnUiThread(() -> {
+                requestRootBtn.setEnabled(true);
+                new MaterialAlertDialogBuilder(this)
+                        .setTitle(result.success ? "Root access granted" : "Root access not granted")
+                        .setMessage(result.message)
+                        .setPositiveButton("OK", null)
+                        .show();
+            });
+        }, "root-request").start();
+    }
+
+    private void installToQuestCraft() {
+        String uuid = extractUUIDFromDisplay();
+        if (uuid == null || uuid.trim().isEmpty()) {
+            Toast.makeText(this, "Create or select an account first", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        File storageDir = getStorageDir();
+        File accountFile = new File(storageDir, uuid + ".json");
+        File launcherConf = new File(storageDir, "launcher.conf");
+        if (!accountFile.isFile() || !launcherConf.isFile()) {
+            Toast.makeText(this, "Create the account file and save the configuration first", Toast.LENGTH_LONG).show();
+            return;
+        }
+        installQuestCraftBtn.setEnabled(false);
+        new Thread(() -> {
+            QuestCraftInstaller.Result result = QuestCraftInstaller.install(getApplicationContext(), accountFile, launcherConf);
+            runOnUiThread(() -> {
+                installQuestCraftBtn.setEnabled(true);
+                new MaterialAlertDialogBuilder(this)
+                        .setTitle(result.success ? "QuestCraft installation complete" : "QuestCraft installation failed")
+                        .setMessage(result.message)
+                        .setPositiveButton("OK", null)
+                        .show();
+            });
+        }, "questcraft-installer").start();
+    }
+
     private void setupClickListeners() {
         Button createAccountBtn = findViewById(R.id.createAccountBtn);
         createAccountBtn.setOnClickListener(v -> createAccountFile());
@@ -201,6 +243,8 @@ public class MainActivity extends AppCompatActivity {
         manualInstallJreBtn.setOnClickListener(v -> showJreInstallationDialog());
         
         viewAccountsBtn.setOnClickListener(v -> showAccountsList());
+        requestRootBtn.setOnClickListener(v -> requestRootAccess());
+        installQuestCraftBtn.setOnClickListener(v -> installToQuestCraft());
 
         // 【新增 v1.4】Change skin按钮：弹出卡片式版本列表，右侧带下载图标
         skinChangeBtn.setOnClickListener(v -> showSkinChangeDialog());

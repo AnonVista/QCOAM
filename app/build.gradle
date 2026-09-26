@@ -1,6 +1,4 @@
-plugins {
-    alias(libs.plugins.android.application)
-}
+apply plugin: 'com.android.application'
 
 android {
     namespace 'cn.qcofa.com'

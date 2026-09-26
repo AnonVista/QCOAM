@@ -52,6 +52,7 @@ public class HomeFragment extends Fragment {
     private Button saveVersionListBtn;
     private Button skinChangeBtn;
     private Button installQuestCraftBtn;
+    private Button requestRootBtn;
     private Button diagnoseQuestCraftBtn;
     private Spinner themeStyleSpinner;
 
@@ -68,7 +69,7 @@ public class HomeFragment extends Fragment {
         // 初始化UI组件
         initViews(view);
         
-        // 加载并显示当前账号信息
+        // 加载并显示Current account信息
         loadAndShowCurrentAccount();
         
         // 设置按钮点击事件
@@ -91,13 +92,14 @@ public class HomeFragment extends Fragment {
         saveVersionListBtn = view.findViewById(R.id.saveVersionListBtn);
         skinChangeBtn = view.findViewById(R.id.skinChangeBtn);
         installQuestCraftBtn = view.findViewById(R.id.installQuestCraftBtn);
+        requestRootBtn = view.findViewById(R.id.requestRootBtn);
         diagnoseQuestCraftBtn = view.findViewById(R.id.diagnoseQuestCraftBtn);
         themeStyleSpinner = view.findViewById(R.id.themeStyleSpinner);
 
-        // 设置用户类型选择器
+        // 设置Account type选择器
         setupUserTypeSpinner();
 
-        // 设置界面风格选择器
+        // 设置UI style选择器
         setupThemeStyleSpinner();
 
         // 设置默认值
@@ -168,6 +170,7 @@ public class HomeFragment extends Fragment {
 
         skinChangeBtn.setOnClickListener(v -> showSkinChangeDialog());
 
+        requestRootBtn.setOnClickListener(v -> requestRootAccess());
         installQuestCraftBtn.setOnClickListener(v -> installToQuestCraft());
         diagnoseQuestCraftBtn.setOnClickListener(v -> showQuestCraftDiagnostics());
 
@@ -187,7 +190,7 @@ public class HomeFragment extends Fragment {
             }
         });
         
-        // 为用户名输入框添加文本变化监听器，自动触发UUID生成
+        // 为Username输入框添加文本变化监听器，自动触发UUID生成
         usernameInput.addTextChangedListener(new android.text.TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -223,6 +226,22 @@ public class HomeFragment extends Fragment {
         });
     }
 
+    private void requestRootAccess() {
+        requestRootBtn.setEnabled(false);
+        new Thread(() -> {
+            QuestCraftInstaller.Result result = QuestCraftInstaller.requestRoot();
+            if (!isAdded()) return;
+            requireActivity().runOnUiThread(() -> {
+                requestRootBtn.setEnabled(true);
+                new MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(result.success ? "Root access granted" : "Root access not granted")
+                        .setMessage(result.message)
+                        .setPositiveButton("OK", null)
+                        .show();
+            });
+        }, "root-request").start();
+    }
+
     private void installToQuestCraft() {
         String uuid = extractUUIDFromDisplay();
         if (uuid == null || uuid.trim().isEmpty()) {
@@ -235,7 +254,7 @@ public class HomeFragment extends Fragment {
         File launcherConf = new File(storageDir, "launcher.conf");
 
         if (!accountFile.isFile() || !launcherConf.isFile()) {
-            Toast.makeText(requireContext(), "请先创建账号文件并保存配置", Toast.LENGTH_LONG).show();
+            Toast.makeText(requireContext(), "请先Create account file并保存配置", Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -253,7 +272,7 @@ public class HomeFragment extends Fragment {
                 new MaterialAlertDialogBuilder(requireContext())
                         .setTitle(result.success ? "QuestCraft 安装完成" : "QuestCraft 安装未完成")
                         .setMessage(result.message)
-                        .setPositiveButton("确定", null)
+                        .setPositiveButton("OK", null)
                         .show();
             });
         }, "questcraft-installer").start();
@@ -269,9 +288,9 @@ public class HomeFragment extends Fragment {
             requireActivity().runOnUiThread(() -> {
                 diagnoseQuestCraftBtn.setEnabled(true);
                 new MaterialAlertDialogBuilder(requireContext())
-                        .setTitle("QuestCraft 诊断")
+                        .setTitle("QuestCraft diagnostics")
                         .setMessage(report)
-                        .setPositiveButton("确定", null)
+                        .setPositiveButton("OK", null)
                         .show();
             });
         }, "questcraft-diagnostics").start();
@@ -280,7 +299,7 @@ public class HomeFragment extends Fragment {
     private void generateUUID() {
         String username = usernameInput.getText().toString().trim();
         if (username.isEmpty()) {
-            // 如果用户名为空，生成随机用户名
+            // 如果Username为空，生成随机Username
             username = "Player_" + System.currentTimeMillis() % 10000;
             usernameInput.setText(username);
         }
@@ -310,7 +329,7 @@ public class HomeFragment extends Fragment {
         String customUuid = customUuidInput.getText().toString().trim();
         String username = usernameInput.getText().toString().trim();
         
-        // 如果自定义UUID输入框为空且用户名不为空，则自动生成UUID
+        // 如果自定义UUID输入框为空且Username不为空，则自动生成UUID
         if (customUuid.isEmpty() && !username.isEmpty()) {
             // 生成离线UUID - 使用与shell脚本相同的算法
             String offline = "offline player:" + username;
@@ -336,7 +355,7 @@ public class HomeFragment extends Fragment {
     }
     
     private String getUserType() {
-        // 获取Spinner中选中的用户类型
+        // 获取Spinner中选中的Account type
         return userTypeSpinner.getSelectedItem().toString();
     }
 
@@ -360,13 +379,13 @@ public class HomeFragment extends Fragment {
     private void createAccountFile() {
         String username = usernameInput.getText().toString().trim();
         if (username.isEmpty()) {
-            Toast.makeText(requireContext(), "请输入用户名", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "请输入Username", Toast.LENGTH_SHORT).show();
             return;
         }
 
         String uuid = extractUUIDFromDisplay();
         if (uuid == null || uuid.isEmpty()) {
-            Toast.makeText(requireContext(), "请先生成UUID", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Generate a UUID first", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -393,15 +412,15 @@ public class HomeFragment extends Fragment {
             writer.write(accountJson.toString(2)); // 格式化缩进
             writer.close();
 
-            Toast.makeText(requireContext(), "账号文件创建成功: " + jsonFile.getName(), Toast.LENGTH_LONG).show();
-            android.util.Log.d("QcofA", "账号文件创建成功: " + jsonFile.getAbsolutePath());
+            Toast.makeText(requireContext(), "Account file created: " + jsonFile.getName(), Toast.LENGTH_LONG).show();
+            android.util.Log.d("QcofA", "Account file created: " + jsonFile.getAbsolutePath());
             
             // 同时更新launcher.conf文件，将新创建的账号添加到配置文件中
             updateLauncherConf(username, uuid);
 
         } catch (Exception e) {
-            android.util.Log.e("QcofA", "创建账号文件失败", e);
-            Toast.makeText(requireContext(), "创建账号文件失败: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            android.util.Log.e("QcofA", "Create account file失败", e);
+            Toast.makeText(requireContext(), "Create account file失败: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -453,34 +472,34 @@ public class HomeFragment extends Fragment {
             writer.write(confJson.toString(2)); // 格式化缩进
             writer.close();
 
-            Toast.makeText(requireContext(), "配置文件更新成功: " + confFile.getName(), Toast.LENGTH_SHORT).show();
-            android.util.Log.d("QcofA", "配置文件更新成功: " + confFile.getAbsolutePath());
+            Toast.makeText(requireContext(), "Configuration updated: " + confFile.getName(), Toast.LENGTH_SHORT).show();
+            android.util.Log.d("QcofA", "Configuration updated: " + confFile.getAbsolutePath());
 
         } catch (Exception e) {
-            android.util.Log.e("QcofA", "更新配置文件失败", e);
-            Toast.makeText(requireContext(), "更新配置文件失败: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            android.util.Log.e("QcofA", "Failed to update configuration", e);
+            Toast.makeText(requireContext(), "Failed to update configuration: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 
     private void saveConfigFiles() {
         String username = usernameInput.getText().toString().trim();
         if (username.isEmpty()) {
-            Toast.makeText(requireContext(), "请输入用户名", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "请输入Username", Toast.LENGTH_SHORT).show();
             return;
         }
 
         String uuid = extractUUIDFromDisplay();
         if (uuid == null || uuid.isEmpty()) {
-            Toast.makeText(requireContext(), "请先生成UUID", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Generate a UUID first", Toast.LENGTH_SHORT).show();
             return;
         }
 
         updateLauncherConf(username, uuid);
         
-        // 保存当前账号信息到SharedPreferences
+        // 保存Current account信息到SharedPreferences
         saveCurrentAccount(username, uuid);
         
-        // 显示当前账号信息
+        // 显示Current account信息
         showCurrentAccountInfo();
     }
     
@@ -506,7 +525,7 @@ public class HomeFragment extends Fragment {
     private void showJreInstallationDialog() {
         // 创建带有三个按钮的对话框 - 使用Material Design
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext());
-        builder.setTitle("手动安装JRE Runtime");
+        builder.setTitle("Manually install JRE Runtime");
         builder.setMessage("当您启动游戏过程中无法正常下载和安装JRE提供了两个选项可以给您手动下载和安装JRE");
 
         // 添加"手动下载安装"按钮
@@ -515,8 +534,8 @@ public class HomeFragment extends Fragment {
         // 添加"本地导出JRE"按钮
         builder.setNeutralButton("本地导出JRE", (dialog, which) -> exportJreToPrivateDirectory());
         
-        // 添加"取消"按钮
-        builder.setNegativeButton("取消", null);
+        // 添加"Cancel"按钮
+        builder.setNegativeButton("Cancel", null);
         
         builder.show();
     }
@@ -528,7 +547,7 @@ public class HomeFragment extends Fragment {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // 需要添加此标志，否则在Fragment中可能会出错
             requireContext().startActivity(intent);
         } catch (Exception e) {
-            Toast.makeText(requireContext(), "无法打开浏览器: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(requireContext(), "Could not open browser: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
     
@@ -539,7 +558,7 @@ public class HomeFragment extends Fragment {
             File confFile = new File(storageDir, "launcher.conf");
             
             if (!confFile.exists()) {
-                Toast.makeText(requireContext(), "暂无已创建的账号", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), "No accounts have been created", Toast.LENGTH_SHORT).show();
                 return;
             }
             
@@ -549,13 +568,13 @@ public class HomeFragment extends Fragment {
             JSONArray accountsArray = confJson.getJSONArray("accounts");
             
             if (accountsArray.length() == 0) {
-                Toast.makeText(requireContext(), "暂无已创建的账号", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), "No accounts have been created", Toast.LENGTH_SHORT).show();
                 return;
             }
             
             // 创建自定义视图的对话框
             MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext());
-            builder.setTitle("已创建的账号列表");
+            builder.setTitle("Created accounts");
             
             // 创建列表视图
             LinearLayout listLayout = new LinearLayout(requireContext());
@@ -576,10 +595,10 @@ public class HomeFragment extends Fragment {
                 TextView uuidView = accountItemView.findViewById(R.id.accountUuid);
                 TextView accountTypeLabel = accountItemView.findViewById(R.id.accountTypeLabel);
                 
-                usernameView.setText("用户名: " + username);
+                usernameView.setText("Username: " + username);
                 uuidView.setText("UUID: " + uuid);
                 
-                // 获取账户类型，如果没有则默认为离线账户
+                // 获取账户类型，如果没有则默认为Offline account
                 String accountType = "offline";
                 if (account.has("accountType")) {
                     accountType = account.getString("accountType");
@@ -587,10 +606,10 @@ public class HomeFragment extends Fragment {
                 
                 // 根据账户类型设置标签
                 if ("premium".equals(accountType)) {
-                    accountTypeLabel.setText("正版账户");
+                    accountTypeLabel.setText("Premium account");
                     accountTypeLabel.setBackgroundTintList(getResources().getColorStateList(R.color.state_success));
                 } else {
-                    accountTypeLabel.setText("离线账户");
+                    accountTypeLabel.setText("Offline account");
                     accountTypeLabel.setBackgroundTintList(getResources().getColorStateList(R.color.state_info));
                 }
                 
@@ -611,17 +630,17 @@ public class HomeFragment extends Fragment {
                         
                         // 更新标签显示
                         if ("premium".equals(newAccountType)) {
-                            accountTypeLabel.setText("正版账户");
+                            accountTypeLabel.setText("Premium account");
                             accountTypeLabel.setBackgroundTintList(getResources().getColorStateList(R.color.state_success));
                         } else {
-                            accountTypeLabel.setText("离线账户");
+                            accountTypeLabel.setText("Offline account");
                             accountTypeLabel.setBackgroundTintList(getResources().getColorStateList(R.color.state_info));
                         }
                         
-                        Toast.makeText(requireContext(), "账户类型已更新", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), "Account type updated", Toast.LENGTH_SHORT).show();
                     } catch (Exception e) {
                         android.util.Log.e("QcofA", "更新账户类型失败", e);
-                        Toast.makeText(requireContext(), "更新失败: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), "Update failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
                 
@@ -642,12 +661,12 @@ public class HomeFragment extends Fragment {
             scrollView.addView(listLayout);
             
             builder.setView(scrollView);
-            builder.setPositiveButton("确定", null);
+            builder.setPositiveButton("OK", null);
             builder.show();
                     
         } catch (Exception e) {
-            android.util.Log.e("QcofA", "读取账号列表失败", e);
-            Toast.makeText(requireContext(), "读取账号列表失败: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            android.util.Log.e("QcofA", "Failed to read account list", e);
+            Toast.makeText(requireContext(), "Failed to read account list: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
     
@@ -676,10 +695,10 @@ private void exportJreToPrivateDirectory() {
             inputStream.close();
             outputStream.close();
 
-            Toast.makeText(requireContext(), "JRE已成功导出到目录: " + jreZipFile.getAbsolutePath(), Toast.LENGTH_LONG).show();
+            Toast.makeText(requireContext(), "JRE exported to: " + jreZipFile.getAbsolutePath(), Toast.LENGTH_LONG).show();
         } catch (IOException e) {
-            android.util.Log.e("QcofA", "导出JRE失败", e);
-            Toast.makeText(requireContext(), "导出JRE失败: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            android.util.Log.e("QcofA", "Failed to export JRE", e);
+            Toast.makeText(requireContext(), "Failed to export JRE: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
     
@@ -688,7 +707,7 @@ private void exportJreToPrivateDirectory() {
         String uuid = extractUUIDFromDisplay();
         
         if (!username.isEmpty() && !uuid.isEmpty()) {
-            Toast.makeText(requireContext(), "当前账号：\n用户名: " + username + "\nUUID: " + uuid, Toast.LENGTH_LONG).show();
+            Toast.makeText(requireContext(), "Current account：\nUsername: " + username + "\nUUID: " + uuid, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -714,10 +733,10 @@ private void exportJreToPrivateDirectory() {
             inputStream.close();
             outputStream.close();
 
-            Toast.makeText(requireContext(), "版本列表已保存到: " + destFile.getAbsolutePath(), Toast.LENGTH_LONG).show();
+            Toast.makeText(requireContext(), "Version list saved to: " + destFile.getAbsolutePath(), Toast.LENGTH_LONG).show();
         } catch (IOException e) {
-            android.util.Log.e("QcofA", "保存版本列表失败", e);
-            Toast.makeText(requireContext(), "保存版本列表失败: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            android.util.Log.e("QcofA", "Save version list失败", e);
+            Toast.makeText(requireContext(), "Save version list失败: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -743,13 +762,13 @@ private void exportJreToPrivateDirectory() {
 
             // 显示弹窗
             MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext());
-            builder.setTitle("当前支持更换皮肤的版本");
+            builder.setTitle("Versions supporting skin changes");
             builder.setMessage(versionList.toString().trim());
-            builder.setPositiveButton("确定", null);
+            builder.setPositiveButton("OK", null);
             builder.show();
         } catch (Exception e) {
-            android.util.Log.e("QcofA", "读取版本列表失败", e);
-            Toast.makeText(requireContext(), "读取版本列表失败", Toast.LENGTH_SHORT).show();
+            android.util.Log.e("QcofA", "Failed to read version list", e);
+            Toast.makeText(requireContext(), "Failed to read version list", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -759,7 +778,7 @@ private void exportJreToPrivateDirectory() {
         if (!storageDir.exists()) {
             if (!storageDir.mkdirs()) {
                 // 如果创建失败（可能是权限不足），回退到应用私有目录
-                android.util.Log.w("QcofA", "无法在根目录创建 QCOFA.COM 文件夹，回退到应用私有目录");
+                android.util.Log.w("QcofA", "Could not create QCOFA.COM in shared storage; using app storage");
                 File fallbackDir = new File(requireContext().getExternalFilesDir(null), "QCOFA.COM");
                 fallbackDir.mkdirs();
                 return fallbackDir;

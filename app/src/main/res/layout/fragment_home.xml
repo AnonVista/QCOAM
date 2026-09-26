@@ -175,6 +175,26 @@
                     android:layout_marginBottom="4dp" />
 
                 <com.google.android.material.button.MaterialButton
+                    android:id="@+id/installQuestCraftBtn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="40dp"
+                    android:text="安装到 QuestCraft"
+                    style="@style/Widget.QcofA.Button"
+                    android:layout_marginBottom="4dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/diagnoseQuestCraftBtn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="40dp"
+                    android:text="QuestCraft 诊断"
+                    style="@style/Widget.QcofA.Button"
+                    app:backgroundTint="@color/surface_container_high"
+                    android:textColor="@color/on_surface"
+                    android:layout_marginBottom="4dp" />
+
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/viewAccountsBtn"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

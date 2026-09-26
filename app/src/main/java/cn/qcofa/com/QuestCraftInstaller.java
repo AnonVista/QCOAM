@@ -31,11 +31,19 @@ public final class QuestCraftInstaller {
 
     // ---------------------------------------------------------------- public
 
+    public static Result requestRoot() {
+        String out = runSu("id\n");
+        boolean ok = out.contains("uid=0");
+        return new Result(ok, ok
+                ? "Magisk/root granted access to QcofA.\n\n" + out
+                : "The su request did not obtain UID 0.\n\nIf Magisk did not show a prompt, check its Superuser list for QcofA and remove/reset any remembered denial, then try again.\n\nRaw su output:\n" + out);
+    }
+
     public static Result install(Context context, java.io.File accountFile, java.io.File launcherConf) {
         StringBuilder log = new StringBuilder();
 
         if (accountFile == null || !accountFile.isFile()) {
-            return new Result(false, "账号文件不存在:\n"
+            return new Result(false, "Account file does not exist:\n"
                     + (accountFile == null ? "(null)" : accountFile.getAbsolutePath()));
         }
         if (launcherConf == null || !launcherConf.isFile()) {
@@ -46,17 +54,17 @@ public final class QuestCraftInstaller {
         // 1. Root check
         if (!hasRoot()) {
             return new Result(false,
-                    "未获取 root 权限。\n\n请确认：\n" +
-                    "1. 设备已 root（Magisk）\n" +
-                    "2. Magisk 中已允许本应用 su\n" +
-                    "3. 若未弹出提示，尝试在 Magisk 的“超级用户”中手动授权");
+                    "Root access was not granted.\n\nCheck:\n" +
+                    "1. The device is rooted (Magisk)\n" +
+                    "2. QcofA is allowed root access in Magisk\n" +
+                    "3. If no prompt appeared, check/reset QcofA in Magisk's Superuser list");
         }
-        log.append("✓ root 已授予\n");
+        log.append("✓ root granted\n");
 
         // 2. Resolve QuestCraft's numeric UID
         int uid = getPackageUid(PKG);
         if (uid < 0) {
-            return new Result(false, "未检测到 QuestCraft（" + PKG + "）。\n请先在设备上安装 QuestCraft。");
+            return new Result(false, "QuestCraft was not detected（" + PKG + "）。\nInstall QuestCraft on the device first.");
         }
         log.append("✓ QuestCraft UID: ").append(uid).append("\n");
 
@@ -81,7 +89,7 @@ public final class QuestCraftInstaller {
                 "restorecon -R '" + ACCOUNTS_DIR + "' 2>/dev/null || true\n";
 
         String out = runSu(script);
-        log.append("--- 安装输出 ---\n").append(out).append("\n");
+        log.append("--- Install output ---\n").append(out).append("\n");
 
         // 4. Verify
         String verify = runSu(
@@ -93,41 +101,41 @@ public final class QuestCraftInstaller {
                 "echo\n" +
                 "echo '--- accounts/ dir ---'\n" +
                 "ls -lad '" + ACCOUNTS_DIR + "' 2>&1\n");
-        log.append("--- 验证 ---\n").append(verify);
+        log.append("--- Verification ---\n").append(verify);
 
         boolean ok = verify.contains(accountName)
                   && verify.contains("launcher.conf")
                   && !verify.contains("No such file");
 
         return new Result(ok,
-                (ok ? "安装完成。\n\n请在断开 Wi-Fi 后启动 QuestCraft。\n\n"
-                    : "安装可能未完成，请查看以下信息。\n\n")
+                (ok ? "Installation complete.\n\nStart QuestCraft after disconnecting Wi-Fi.\n\n"
+                    : "Installation may not have completed; see details below.\n\n")
                 + log.toString());
     }
 
     public static String diagnose(Context context) {
         StringBuilder sb = new StringBuilder();
-        sb.append("=== QCOFA 诊断 ===\n\n");
-        sb.append("root: ").append(hasRoot() ? "是" : "否").append("\n");
+        sb.append("=== QCOFA diagnostics ===\n\n");
+        sb.append("root: ").append(hasRoot() ? "yes" : "no").append("\n");
 
         int uid = getPackageUid(PKG);
         sb.append("QuestCraft UID: ").append(uid).append("\n\n");
 
         // Show expected vs actual so mismatches are obvious.
         String dump = runSu(
-                "echo '--- 期望: 私有账号目录 " + ACCOUNTS_DIR + " (owner " + uid + ", 700) ---'\n" +
+                "echo '--- Expected private account directory " + ACCOUNTS_DIR + " (owner " + uid + ", 700) ---'\n" +
                 "ls -lad '" + ACCOUNTS_DIR + "' 2>&1\n" +
                 "echo\n" +
-                "echo '--- 私有账号文件 ---'\n" +
+                "echo '--- Private account files ---'\n" +
                 "ls -la '" + ACCOUNTS_DIR + "' 2>&1\n" +
                 "echo\n" +
-                "echo '--- 公共 launcher.conf (期望: 不要 chown) ---'\n" +
+                "echo '--- Public launcher.conf (do not chown) ---'\n" +
                 "ls -la '" + PUBLIC_FILES + "/launcher.conf' 2>&1\n" +
                 "echo\n" +
-                "echo '--- 公共目录 ---'\n" +
+                "echo '--- Public directory ---'\n" +
                 "ls -lad '" + PUBLIC_FILES + "' 2>&1\n" +
                 "echo\n" +
-                "echo '--- SELinux 上下文 ---'\n" +
+                "echo '--- SELinux context ---'\n" +
                 "ls -Z '" + ACCOUNTS_DIR + "' 2>&1\n");
 
         sb.append(dump);
@@ -179,7 +187,7 @@ public final class QuestCraftInstaller {
 
         } catch (Exception e) {
             Log.e(TAG, "runSu failed", e);
-            return "su 调用失败: " + e.getMessage() + "\n";
+            return "su invocation failed: " + e.getMessage() + "\n";
         } finally {
             if (p != null) p.destroy();
         }

@@ -13,7 +13,7 @@
 
 
 
-        <!-- 第一个卡片：离线账户配置 -->
+        <!-- 第一个卡片：Offline account配置 -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -32,13 +32,13 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="配置离线账户文件"
+                    android:text="Offline account configuration"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="@color/on_surface"
                     android:layout_marginBottom="16dp" />
 
-                <!-- 用户名输入 -->
+                <!-- Username输入 -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -50,7 +50,7 @@
                         android:id="@+id/usernameInput"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="用户名"
+                        android:hint="Username"
                         android:textColor="@color/on_surface"
                         android:textSize="16sp" />
                 </com.google.android.material.textfield.TextInputLayout>
@@ -78,11 +78,11 @@
                         android:gravity="center"
                         android:layout_marginEnd="8dp" />
 
-                    <!-- 其他功能文本 -->
+                    <!-- Other options文本 -->
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="其他功能"
+                        android:text="Other options"
                         android:textSize="16sp"
                         android:textColor="@color/on_surface"
                         android:textStyle="bold" />
@@ -108,16 +108,16 @@
                             android:id="@+id/customUuidInput"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="自定义UUID (留空则自动生成)"
+                            android:hint="Custom UUID (leave blank to generate)"
                             android:textColor="@color/on_surface"
                             android:textSize="16sp" />
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <!-- 用户类型选择 -->
+                    <!-- Account type选择 -->
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="用户类型"
+                        android:text="Account type"
                         android:textSize="14sp"
                         android:textColor="@color/on_surface_variant"
                         android:layout_marginBottom="8dp" />
@@ -145,11 +145,11 @@
                         android:padding="12dp"
                         android:typeface="monospace" />
 
-                    <!-- 界面风格选择（移入折叠区域，减少主界面占用） -->
+                    <!-- UI style选择（移入折叠区域，减少主界面占用） -->
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="界面风格"
+                        android:text="UI style"
                         android:textSize="14sp"
                         android:textColor="@color/on_surface_variant"
                         android:layout_marginBottom="8dp" />
@@ -170,7 +170,16 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:minHeight="40dp"
-                    android:text="创建账号文件"
+                    android:text="Create account file"
+                    style="@style/Widget.QcofA.Button"
+                    android:layout_marginBottom="4dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/requestRootBtn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="40dp"
+                    android:text="Request root access"
                     style="@style/Widget.QcofA.Button"
                     android:layout_marginBottom="4dp" />
 
@@ -179,7 +188,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:minHeight="40dp"
-                    android:text="安装到 QuestCraft"
+                    android:text="Install to QuestCraft"
                     style="@style/Widget.QcofA.Button"
                     android:layout_marginBottom="4dp" />
 
@@ -188,7 +197,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:minHeight="40dp"
-                    android:text="QuestCraft 诊断"
+                    android:text="QuestCraft diagnostics"
                     style="@style/Widget.QcofA.Button"
                     app:backgroundTint="@color/surface_container_high"
                     android:textColor="@color/on_surface"
@@ -199,7 +208,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:minHeight="40dp"
-                    android:text="查看已创建账号列表"
+                    android:text="View created accounts"
                     style="@style/Widget.QcofA.Button"
                     app:backgroundTint="@color/surface_container_high"
                     android:textColor="@color/on_surface"
@@ -208,7 +217,7 @@
                 </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- 第三个卡片：版本管理（新功能集中放置） -->
+        <!-- 第三个卡片：Version management（新功能集中放置） -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -227,7 +236,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="版本管理"
+                    android:text="Version management"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="@color/on_surface"
@@ -238,7 +247,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:minHeight="48dp"
-                    android:text="皮肤更换"
+                    android:text="Change skin"
                     style="@style/Widget.QcofA.Button"
                     app:backgroundTint="@color/surface_container_high"
                     android:textColor="@color/on_surface"
@@ -249,7 +258,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:minHeight="48dp"
-                    android:text="保存版本列表"
+                    android:text="Save version list"
                     style="@style/Widget.QcofA.Button"
                     app:backgroundTint="@color/surface_container_high"
                     android:textColor="@color/on_surface"
@@ -258,7 +267,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="此选项在您没有魔法上网时下载不到版本列表时才用得到"
+                    android:text="Use this if the version list cannot be downloaded normally"
                     android:textSize="12sp"
                     android:textColor="@color/on_surface_variant"
                     android:gravity="center"
@@ -268,7 +277,7 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- 第二个卡片：用户简单配置 -->
+        <!-- 第二个卡片：Basic configuration -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -287,7 +296,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="用户简单配置"
+                    android:text="Basic configuration"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="@color/on_surface"
@@ -298,7 +307,7 @@
                     android:id="@+id/legalCheck"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="已接受法律条款 (acceptedLegal)"
+                    android:text="Accepted legal terms (acceptedLegal)"
                     android:checked="true"
                     android:layout_marginBottom="8dp" />
 
@@ -306,14 +315,14 @@
                     android:id="@+id/devModsCheck"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="启用开发者模组 (setDevMods)"
+                    android:text="Enable developer mods (setDevMods)"
                     android:layout_marginBottom="8dp" />
 
                 <com.google.android.material.switchmaterial.SwitchMaterial
                     android:id="@+id/customRamCheck"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="自定义内存 (setCustomRAM)"
+                    android:text="Custom RAM (setCustomRAM)"
                     android:layout_marginBottom="8dp" />
 
                 <!-- 内存值输入 -->
@@ -328,7 +337,7 @@
                         android:id="@+id/ramValueInput"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="自定义内存值 (如: 2048)"
+                        android:hint="Custom RAM值 (如: 2048)"
                         android:inputType="number"
                         android:textColor="@color/on_surface"
                         android:textSize="16sp" />
@@ -338,7 +347,7 @@
                     android:id="@+id/demoModeCheck"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="演示模式 (isDemoMode)"
+                    android:text="Demo mode (isDemoMode)"
                     android:layout_marginBottom="12dp" />
 
                 <!-- 操作按钮 -->
@@ -347,7 +356,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:minHeight="40dp"
-                    android:text="保存配置文件"
+                    android:text="Save configuration"
                     style="@style/Widget.QcofA.Button"
                     android:layout_marginBottom="4dp" />
 
@@ -356,7 +365,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:minHeight="40dp"
-                    android:text="手动安装JRE Runtime"
+                    android:text="Manually install JRE Runtime"
                     style="@style/Widget.QcofA.Button"
                     app:backgroundTint="@color/surface_container_high"
                     android:textColor="@color/on_surface"
